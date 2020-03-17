@@ -14,7 +14,7 @@
   <DisplayName DefaultValue="  Salesforces - BYES" />
   <Description DefaultValue="Test Salesforces Interface" />
   <!--Icon for your add-in. Used on installation screens and the add-ins dialog -->
-  <IconUrl DefaultValue="https://pwa.challenge4fun.com/Excel2SF/Home.html" />
+  <IconUrl DefaultValue="https://inspiring-chandrasekhar-e84cc7.netlify.com/" />
   <HighResolutionIconUrl DefaultValue="" />
   <SupportUrl DefaultValue="[Insert the URL of a page that provides support information for the app]" />
   <!--BeginTaskpaneMode integration. Office 2013 and any client that doesn't understand commands will use this section.
@@ -26,7 +26,7 @@
     <!-- <SourceLocation DefaultValue="https://commandsimple.azurewebsites.net/Taskpane.html" /> -->
    <!-- <SourceLocation DefaultValue="https://localhost:443/TEST/LoginSales.html" /> -->
    <!-- <SourceLocation DefaultValue="https://localhost:443/TEST/FHA.html" /> -->
-   <SourceLocation DefaultValue="https://pwa.challenge4fun.com/Excel2SF/Home.html" />
+   <SourceLocation DefaultValue="https://inspiring-chandrasekhar-e84cc7.netlify.com/" />
   </DefaultSettings>
   <!--EndTaskpaneMode integration -->
 
