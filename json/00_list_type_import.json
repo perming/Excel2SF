@@ -1,69 +1,18 @@
 {
-  "Name": "Contrat Simple",
-  "Description": "Ce fichier est la description d'import pour un contrat simple",
-  "Url": "http://XXXXX.com",
-  "Version": "0.0.1",
-  "Onglets": [
-    {
-      "Titre": "Site 1",
-      "Colonnes": [
-        {
-          "Nom": "prénom",
-          "TypeContraint": "Format",
-          "Constraints": {
-              "password" :{
-                "presence" : true,
-                "length" :{
-                  "minimum":3,
-                  "message" : "Erreur 99"
-                  }
-                }
-              }
-          },
-          {
-            "Nom": "Nom de famille",
-            "TypeContraint": "Format",
-            "Constraints": {
-                "password" :{
-                  "presence" : true,
-                  "length" :{
-                    "minimum":5,
-                    "message" : "Erreur 2000"
-                    }
-                  }
-                }
-            }  
-      ]
+  "objects": [{
+      "name": "Contrat de type FM",
+      "description": "Contrat de type FM",
+      "json": "./json/contrat_FM.json"
     },
     {
-      "Titre": "Bâtiment Site 1",
-      "Colonnes": [
-        {
-          "Nom": "Colonne 1",
-          "TypeContraint": "Format",
-          "Constraints": {}
-        }
-      ]
+      "name": "Contrat de type PPP",
+      "description": "Contrat de type PPP",
+      "json": "./json/contrat_PPP.json"
     },
     {
-      "Titre": "Espace Site 1 ",
-      "Colonnes": [
-        {
-          "Nom": "Colonne 1",
-          "TypeContraint": "Format",
-          "Constraints": {}
-        }
-      ]
-    },
-    {
-      "Titre": "Equipement Site 1 ",
-      "Colonnes": [
-        {
-          "Nom": "Colonne 1",
-          "TypeContraint": "Format",
-          "Constraints": {}
-        }
-      ]
+      "name": "Contrat de type ITI",
+      "description": "Contrat de type ITI",
+      "json": "./json/contrat_ITI.json"
     }
   ]
 }

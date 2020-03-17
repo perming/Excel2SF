@@ -12,21 +12,24 @@ function Start(){
     Colj=localStorage.getItem("Colj");
     console.log(" Test Nbl : " + Nbli);
     console.log(" Test Nbc : " + Colj);
+    
+  //  Nbli = 22;
+    Colj= 5;
 
-    Clear(Nbli,0);
-
-    Verif(Nbli,0);
-
-     }, 2000);
+      // for (Colj=0; Colj < 3; Colj++){
+          Clear(Nbli,Colj);
+          Verif(Nbli,Colj);
+      // }  
+      console.log("This is the end"); 
+  }, 2000);
+ 
 }
 
 /////////////////////////////////////////////////////////
 //Effacement des cellules coloriées
 function Clear(Nbli,Colj){
     console.log("Start Clear");
-    var NbLigne=Nbli;
-    var NumCol = 0;
-    var RangeT = RangeTrait(NbLigne,NumCol);
+    var RangeT = RangeTrait(Nbli,Colj);
 
     Excel.run(function (context) {
 
@@ -37,7 +40,7 @@ function Clear(Nbli,Colj){
         //Range.comments.delete();
         return context.sync().then(function () { 
           console.log(RangeT);
-          Range2.format.fill.color="white";
+          Range2.format.fill.color= "#FFFFFF" //"white";
           console.log("Clear fini"); 
         }); 
      })//.catch(function (error) { 
@@ -59,34 +62,39 @@ function Verif(Nbli,Colj){
   Excel.run(function (context) {
     console.log("Start vérif");
 
-    var NbLigne= 30;// Nbli;
-    var NumCol = 0;
     var NbError = 0;
-    var RangeT = RangeTrait(NbLigne,NumCol);
+    var RangeT = RangeTrait(Nbli,Colj);
     var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
-    GetJson(Colj);
-    console.log("Nom Colo : " + Name_Ong);
-    console.log( Constraints);
+
 
       return context.sync().then(function () { 
-        console.log(_range.values[0][NumCol]);
-        
-        for (var i=0; i<NbLigne;i++){
-  
-          var Cellv=_range.values[i][0];
-          var range = context.workbook.worksheets.getActiveWorksheet().getCell(i,NumCol);  
-          var Result = validate({password: Cellv}, Constraints);
-          if (typeof Result !== 'undefined'){
-                    console.log("Erreur ligne :" + ( i+ 1)); 
-                     range.format.fill.color = 'red'
+
+        GetJson(Colj);
+        console.log("Nom Colo : " + Name_Colonne);
+        var rangeH = context.workbook.worksheets.getActiveWorksheet().getCell(0,Colj); 
+        var Colo_ex =_range.values[0][0];
+        console.log("Colo Ex : " + Colo_ex);
+         if (Name_Colonne !== Colo_ex){
+          rangeH.format.fill.color = 'yellow';
+         }
+
+          for (var i=1; i<Nbli;i++){
+            var Cellv=_range.values[i][0];
+            var CellC = ("Prénom" + ":" + Cellv);
+            var range = context.workbook.worksheets.getActiveWorksheet().getCell(i,Colj);
+            //var Result =validate.validators.datetime(Cellv, {datetime: true});  
+              var Result = validate.single(Cellv, Constraints);
+            if (typeof Result !== 'undefined'){
+                  //  console.log("Erreur ligne :" + ( i+ 1)); 
+                     range.format.fill.color = 'red';
                      NbError ++; 
                      // var comments = context.workbook.comments;
                      // comments.add(range, "Erreur 99");
-                     var Error1 = Result.password[0];
-                     console.log(Error1);
-          }
-        } 
-        console.log("Vérif Terminé : " + NbError + " Erreurs");
+                    var Error1 = Result[0];
+                   // console.log(Error1);
+              }
+          } 
+        console.log("Vérif Terminé : " + NbError + " Erreurs" + " - Colonne : " + Colj);
         //MsgBox(); 
       }); 
    })//.catch(function (error) { 
@@ -143,7 +151,7 @@ function Affiche_le_Range_Sélectionné() {
     });
 } 
 //////////////////////////////////
-// Ouvrir une fenetre dialgue HTML
+// Ouvrir une fenetre dialogue HTML
 function MsgBox() {
     console.log("Hello");
     // document.write('Hello World!');
@@ -154,7 +162,15 @@ function MsgBox() {
 ///////////////////////////////
 function LoadJs(){
     console.log("Load");
-    $.get("Contrat.json", function(data){
+    IdL=document.getElementById("ListeContrat").options.selectedIndex
+    var Lc= localStorage.getItem("Liste_Contrat");
+    var Lc =JSON.parse(Lc);
+    var JsonFile=Lc.objects[IdL].json
+
+  $.get(JsonFile, function(data){
+    localStorage.setItem("JsonFile",JSON.stringify(data));
+  });
+    $.get(JsonFile, function(data){
         for (i=0; i<4;i++){
         var c1=data.Onglets[i].Titre
         var L1 = document.getElementById("Lbl" + i);
@@ -195,7 +211,6 @@ Excel.run(function (context) {
 
 ///////////////////////////////////////////////
 function Nblx(){
-
   Excel.run(function (context) {
     var sheet = context.workbook.worksheets.getActiveWorksheet();
     var range = sheet.getUsedRange();
@@ -223,20 +238,40 @@ function Coly(){
   })//.catch(errorHandlerFunction);
 }
 
+//////////////////////////////////////////////////////
+//Selection Range
+function SelectRange (Range){
+  Excel.run(function (context) {
+    var sheet = context.workbook.worksheets.getActiveWorksheet();
+    sheet.getRange(Range).select();
+    return context.sync()
+    //Range
+        .then(function () {
+        });
+  })
+}
+
 ////////////////////////////////////////////
-// Reads data from current document selection and displays a notification
-        function writeText() {
-            Office.context.document.setSelectedDataAsync("Data here -->",
+// Insertion Fichier
+function InsertFile(){
+  SelectRange("A1");
+
+  setTimeout(function(){ 
+    var ImportF = [["Hello","coucou"],["Hello1","coucou1"]];
+    console.log(ImportF);  
+    Office.context.document.setSelectedDataAsync(ImportF,
                 function (asyncResult) {
                     var error = asyncResult.error;
                     if (asyncResult.status === "failed") {
-                        //show error. Upcoming displayDialog API will help here.
                     }
                     else {
-                        //show success.Upcoming displayDialog API will help here.
+                        console.log("ok");
                     }
                 });
+      },1000);     
         }
+
+
 ////////////////////////////
 function run1() {
 
@@ -253,26 +288,29 @@ function run1() {
 
 function Start1(){
       console.log("Start FHA ...")
+      $.get("./json/00_list_type_import.json", function(data){
+        localStorage.setItem("Liste_Contrat",JSON.stringify(data));
+      });
+      var Liste_Contrat= localStorage.getItem("Liste_Contrat");
+      var Liste_Contrat =JSON.parse(Liste_Contrat);
+      var ListeC = document.getElementById('ListeContrat');
 
-      $.get("Contrat.json", function(data){
-        //console.log(data);
-        
+      for (var i = 0 ; i < Liste_Contrat.objects.length ; i++) {
+        var Contrat = Liste_Contrat.objects[i].name;
+        var opt = document.createElement('option');
+        opt.appendChild(document.createTextNode(Contrat) );
+        opt.value = 'option value'; 
+        ListeC.appendChild(opt); 
+      }
+      LoadJs();
+      $.get("./json/Contrat_FM.json", function(data){
         localStorage.setItem("JsonFile",JSON.stringify(data));
-        });
-       var JJ= localStorage.getItem("JsonFile");
-       console.log(JSON.parse(JJ));
-}
-
-
-//////////////////////////////////////
-function __Nblx(Nbli){
-    return Nbly = 99;  
+      });
 }
 
 ///////////////////////////////////////////////////////  
 //Effacement Commentaire
 function DelCom(d,c){
-    // var sheet = context.workbook.worksheets.getActiveWorksheet();
      Excel.run(function (context) {
        var Comm = (d+ "!A" + c);
       //console.log(Comm)
@@ -281,32 +319,12 @@ function DelCom(d,c){
    
      });
 }
-//////////////////////////////////////////////////////////
 
-  //     async function ff() {
-  //       let promise = new Promise((resolve, reject) => {
-  //         setTimeout(() => resolve(Nbl()), 5000)
-  //       });
-  //       let result = await promise; // wait until the promise resolves (*)
-  //     console.log(result);
-  //      // alert(result); // "done!"
-  //     }
-  // ff();
-
-
-  ///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 
   function Verif_File(){
     console.log("Vérifivcation");
     var fileUpload = document.getElementById("fileConvert");
-    
-   //var fileUpload.value="C:\\Users\\f.hamid\\Desktop\\Contrat Simple.json";
-
-    //C:\Users\f.hamid\Desktop\Contrat Simple.json
-    //console.log(fileUpload);
-    //  if (document.getElementById("fileConvert").value =""){
-    //      console.log ("KO");
-    //  };
     
      var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt|.json)$/;
     if (regex.test(fileUpload.value.toLowerCase())) {
@@ -323,11 +341,6 @@ function DelCom(d,c){
              Contrat[i] = myNewJSON.Onglets[i]['Titre'];   
             }
             console.log(Contrat);
-
-                //console.log(JSON.stringify(result));
-               // return JSON.stringify(result); //JSON
-              
-                
             }
             reader.readAsText(fileUpload.files[0]);
         } else {
@@ -343,8 +356,84 @@ function DelCom(d,c){
 function GetJson(Colj){
   var JsonFile= localStorage.getItem("JsonFile");
   var JJ =JSON.parse(JsonFile);
-  return [Name_Ong = JJ.Onglets[0].Colonnes[Colj].Nom,
+  return [Name_Colonne = JJ.Onglets[0].Colonnes[Colj].Nom,
          Constraints = JJ.Onglets[0].Colonnes[Colj].Constraints
-]
+        ]
+}
+
+///////////////////////////////////////
+validate.extend(validate.validators.datetime, {
+  // The value is guaranteed not to be null or undefined but otherwise it
+  // could be anything.
+  parse: function(value, options) {
+    return +moment.utc(value);
+  },
+  // Input is a unix timestamp
+  format: function(value, options) {
+    var format = options.dateOnly ? "DD/MM/YYYY" : "DD/MM/YYYY hh:mm:ss";
+    return moment.utc(value).format(format);
+  }
+});
+
+/////////////////////////////
+function VerifOng(){
+  console.log("Vérif");
+
+  Excel.run(function (context) {
+    var sheetName1 = 'Contrat1';
+    var rangeAddress = 'A1';
+    var worksheet = context.workbook.worksheets.getItem(sheetName1);
+
+    var range = worksheet.getRange(rangeAddress).value;
+    return context.sync()
+    console.log(range);
+  })
+}
+
+///////////////////////////////////////////
+
+function CompareCol(){
+
+  console.log("RechercheV ...");
+//setTimeout(function(){ 
+
+ //Nbli=localStorage.getItem("Nbli");
+  var Nbli = 50 //Nblx();
+  var C = 0;
+  Excel.run(function (context) {
+    var RangeT = ("A1:A" + Nbli);
+    var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
+  return context.sync()
+      .then(function () {
+        console.log(Nbli);
+        for (var i = 0 ; i<=Nbli ; i++ ) {
+          var Cellv=_range.values[i][C];
+          RechV(Cellv,i);
+
+        }
+        if (i==Nbli){console.log("Finish");}  
+      });
+
+  })
+//}, 500);
+}
+
+////////////////////////////////////////
+// Fonction RechercheV + coloration des cellules non trouvées
+function RechV(Cellv,i){
+  Excel.run(function (context) {
+    var Range = context.workbook.worksheets.getItem("C2").getRange("A1:A2000");
+    var unitSoldInNov = context.workbook.functions.vlookup(Cellv, Range, 1, false);
+    unitSoldInNov.load('value');
+
+    return context.sync()
+        .then(function () {
+          if (unitSoldInNov.value == null){
+             console.log('Non Trouvé  Ligne : ' + i + '  ' + Cellv + '  ' + unitSoldInNov.value);            
+             var CC = context.workbook.worksheets.getActiveWorksheet().getCell(i,0);
+             CC.format.fill.color = 'red';
+           }
+        });
+  })
 
 }
