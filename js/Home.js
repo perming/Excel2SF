@@ -66,7 +66,6 @@ function Verif(Nbli,Colj){
     var RangeT = RangeTrait(Nbli,Colj);
     var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
 
-
       return context.sync().then(function () { 
 
         GetJson(Colj);
@@ -218,7 +217,6 @@ function Nblx(){
     return context.sync()
         .then(function () {
           var Nbli = range.rowCount;
-        //  console.log("Ligne count : " + Nbli);
           localStorage.setItem("Nbli",Nbli);
         });
   })//.catch(errorHandlerFunction);
@@ -391,36 +389,80 @@ function VerifOng(){
 }
 
 ///////////////////////////////////////////
+function SelectSheet(Sheetname){
+Excel.run(function (context) {
+  var sheet = context.workbook.worksheets.getItem(Sheetname);
+  sheet.activate();
+  sheet.load("name");
+
+  return context.sync()
+      .then(function () {
+          console.log(`The active worksheet is "${sheet.name}"`);
+      });
+})
+}
+////////////
 
 function CompareCol(){
 
   console.log("RechercheV ...");
-//setTimeout(function(){ 
-
- //Nbli=localStorage.getItem("Nbli");
-  var Nbli = 50 //Nblx();
+  ListeRech();
+  setTimeout(function(){ 
+  
+  //Nbli=localStorage.getItem("Nbli");
+  var Nbli = 55; //Nblx();
   var C = 0;
+// SelectSheet("C1");
   Excel.run(function (context) {
+
     var RangeT = ("A1:A" + Nbli);
+    var sheet = context.workbook.worksheets.getItem("C1");
+    sheet.activate();
+    sheet.load("name");
+
     var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
+   
+    var RangeC = localStorage.getItem("RangeC");
+    RangeC=(RangeC.split(","));
+
   return context.sync()
       .then(function () {
-        console.log(Nbli);
         for (var i = 0 ; i<=Nbli ; i++ ) {
           var Cellv=_range.values[i][C];
-          RechV(Cellv,i);
-
+          if (RangeC.indexOf(Cellv) == "-1"){
+            console.log("Ligne : " + (i+1) + " Cellv : " + Cellv + " Trouvé : " +  (RangeC.indexOf(Cellv) +1));
+            var range = context.workbook.worksheets.getActiveWorksheet().getCell((i+1),(C+1));
+            range.format.fill.color = 'red';
+          }
         }
-        if (i==Nbli){console.log("Finish");}  
       });
-
   })
-//}, 500);
+  }, 1000);
+}
+
+////////////////////////////////////////
+function ListeRech(){
+  var Nbli = 59 //Nblx();
+  var C = 0;
+  Sheetname="C2";
+  SelectSheet(Sheetname);
+  setTimeout(function(){ 
+  Excel.run(function (context) {
+     var RangeT2 = ("A1:A" + Nbli);
+     var worksheet = context.workbook.worksheets.getItem(Sheetname);
+     var range2 = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT2).load("values,address");
+  return context.sync()
+      .then(function () {
+          var RangeC= range2.values;
+        localStorage.setItem("RangeC",RangeC);
+      });
+  })
+}, 1000);
 }
 
 ////////////////////////////////////////
 // Fonction RechercheV + coloration des cellules non trouvées
-function RechV(Cellv,i){
+function RechV_old(Cellv,i){
   Excel.run(function (context) {
     var Range = context.workbook.worksheets.getItem("C2").getRange("A1:A2000");
     var unitSoldInNov = context.workbook.functions.vlookup(Cellv, Range, 1, false);
@@ -435,5 +477,43 @@ function RechV(Cellv,i){
            }
         });
   })
+}
 
+///////////////////////////////////////////////
+function Comp_WorkB(){
+    Excel.run(function (context) {
+     var Wb= (context.Workbook.Open.FileName="Excel2SF.xlsx", ReadOnly=True);
+      var sheet =Wd.workbook.worksheets.getItem("C3");
+    var range = sheet.getUsedRange();
+    range.load("rowCount");
+    return context.sync()
+        .then(function () {
+          var Nbli = range.rowCount;
+         console.log("Ligne count : " + Nbli);
+        });
+  })
+}
+///////////////////////////////////////////////
+function Add_Id(){
+  console.log("Start vérif Id");
+  Nbli=localStorage.getItem("Nbli");
+  Colj=localStorage.getItem("Colj");
+
+  Nbli="10";
+  var RangeT = ("A1:B" + Nbli);
+
+  console.log(" Test Nbl : " + Nbli);
+  Excel.run(function (context) {
+
+  var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
+  
+  return context.sync().then(function () { 
+    for (var i = 1 ; i<=Nbli ; i++ ) {
+    var Cellv=_range.values[i][0];
+   // _range[i][1].values="ID_1";
+
+    console.log(Cellv);
+  };
+  });
+  });
 }
