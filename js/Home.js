@@ -3,9 +3,8 @@ var arrSheetTraitement = [];
 function init(){
       console.log("Start load json files ...");
 	  document.getElementById("gif_patenter").style.display = "none";
-      $.get("./json/00_list_type_import.json", function(data){
-        localStorage.setItem("Liste_Contrat",JSON.stringify(data));
-      });
+      var data = getUrlJsonSync("./json/00_list_type_import.json");
+	  localStorage.setItem("Liste_Contrat",JSON.stringify(data));
       var Liste_Contrat= localStorage.getItem("Liste_Contrat");
       var Liste_Contrat =JSON.parse(Liste_Contrat);
       var ListeC = document.getElementById('ListeContrat');
@@ -20,9 +19,8 @@ function init(){
       }
       onChangeJSON();
 	  //
-      $.get("./json/Contrat_LP.json", function(data){
-        localStorage.setItem("JsonFile",JSON.stringify(data));
-      });
+      var data1 = getUrlJsonSync("./json/Contrat_LP.json");
+      localStorage.setItem("JsonFile",JSON.stringify(data1));
 }
 ///////////////////////////////
 function onChangeJSON(){
