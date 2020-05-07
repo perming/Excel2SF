@@ -3,7 +3,7 @@
 
   <!-- See https://github.com/OfficeDev/Office-Add-in-Commands-Samples for documentation  Test FHA -->
 
-  <!-- BeginBasicSettings: Add-in metadata, used for all versions of Office unless override provided Test LPE-->
+  <!-- BeginBasicSettings: Add-in metadata, used for all versions of Office unless override provided -->
 
   <!--IMPORTANT! Id must be unique for your add-in. If you copy this manifest ensure that you change this id to your own GUID. -->
   <Id>e504fb41-a92a-4526-b101-542f357b7acb</Id>

@@ -1,5 +1,303 @@
-////////////////////////////////////////////
+var arrSheetTraitement = [];
 
+function init(){
+      console.log("Start load json files ...");
+	  document.getElementById("gif_patenter").style.display = "none";
+      $.get("./json/00_list_type_import.json", function(data){
+        localStorage.setItem("Liste_Contrat",JSON.stringify(data));
+      });
+      var Liste_Contrat= localStorage.getItem("Liste_Contrat");
+      var Liste_Contrat =JSON.parse(Liste_Contrat);
+      var ListeC = document.getElementById('ListeContrat');
+
+	  // Chargement de la liste des fichiers JSON contenu dans 00_list_type_import.json
+      for (var i = 0 ; i < Liste_Contrat.objects.length ; i++) {
+        var Contrat = Liste_Contrat.objects[i].name;
+        var opt = document.createElement('option');
+        opt.appendChild(document.createTextNode(Contrat) );
+        opt.value = 'option value'; 
+        ListeC.appendChild(opt); 
+      }
+      onChangeJSON();
+	  //
+      $.get("./json/Contrat_LP.json", function(data){
+        localStorage.setItem("JsonFile",JSON.stringify(data));
+      });
+}
+///////////////////////////////
+function onChangeJSON(){
+    console.log("Load JSON file");
+	var strDivId = "accordionId";
+    IdL=document.getElementById("ListeContrat").options.selectedIndex
+    var Lc= localStorage.getItem("Liste_Contrat");
+    var Lc =JSON.parse(Lc);
+    var JsonFile=Lc.objects[IdL].json
+	var data = getUrlJsonSync(JsonFile);
+	localStorage.setItem("JsonFile",JSON.stringify(data));
+	clearTableOnglet(strDivId);
+	addHtml(strDivId,"Description",data.Description);
+	//data.Colonnes[j].Formule
+	var arrayListOnglet = new Array();
+    for (i=0; i<data.Onglets.length;i++){
+		var c1=data.Onglets[i].Titre
+		var strTxt = data.Onglets[i].Description + "<BR>"
+		if(!(data.Onglets[i].Colonnes===undefined)){
+			for (j=0; j<data.Onglets[i].Colonnes.length;j++){
+				strTxt = strTxt + "<li>" + data.Onglets[i].Colonnes[j].Nom +" : " + data.Onglets[i].Colonnes[j].Aide +"</li>" ;
+			}
+		}
+		addHtml(strDivId,c1,strTxt);
+		arrayListOnglet.push(c1);
+		//insertRowOnglet(c1);
+		//var L1 = document.getElementById("Lbl" + i);
+		//L1.textContent=c1;
+    }
+	localStorage.setItem("arrayListOnglet",JSON.stringify(arrayListOnglet));
+	localStorage.setItem("arrayListOngletSelected",JSON.stringify(arrayListOnglet));
+}
+
+function addHtml(strDivId,strTitre,strText){
+	var html = document.getElementById(strDivId);
+	var start = "<a style=\"height:35px;width:100%;text-align: left;\" class=\"btn btn-primary\" data-toggle=\"collapse\" href=\"#multiCollapse"+strTitre+"\" role=\"button\" aria-expanded=\"true\" aria-controls=\"multiCollapse"+strTitre+"\">";
+	var milde = "</a><div class=\"collapse multi-collapse\" id=\"multiCollapse"+strTitre+"\"><div class=\"card card-body\">";
+	var end = "</div></div>";
+	var addRow = start+strTitre+milde+strText+end;
+	html.innerHTML = html.innerHTML+addRow;
+}
+function insertRowOnglet(title){
+	var Table = document.getElementById("listeOnglet");
+	var addRow = "<tr><th scope=\"row\"><input onchange=\"onChangeCheked(this);\" class=\"form-check-input\" type=\"checkbox\" value=\""+title+"\" checked=\"true\" id=\"idCheck"+title+"\"></th><td><label id=\"Lb"+title+"\">"+title+"</label></td></tr>";
+	Table.innerHTML = Table.innerHTML+addRow;
+}
+function clearTableOnglet(strID){
+	var html = document.getElementById(strID);
+	html.innerHTML = "";
+}
+function onChangeCheked(checkbox){
+	var arrayListOnglet = JSON.parse(localStorage.getItem("arrayListOngletSelected"));
+	if(checkbox.checked){
+		arrayListOnglet.push(checkbox.value);
+	}else{
+		arrayListOnglet.splice(arrayListOnglet.indexOf(checkbox.value), 1);
+	}
+	localStorage.setItem("arrayListOngletSelected",JSON.stringify(arrayListOnglet));
+}
+/////////////////////////////
+
+function getExcelColonneStr(strHeader,strAide,strValue,cptRow) {
+	var tableau = [];
+	var tHeader = [];
+	var tAide = [];
+	var tValue = [];
+	tHeader.push(strHeader);
+	tAide.push(strAide);
+	tValue.push(strValue);
+	tableau.push(tHeader);
+	tableau.push(tAide);
+	for(var k = 1; k < cptRow; k++){
+		tableau.push(tValue);
+	}
+    return tableau;
+}
+function getExcelColonneFormuleStr(strValue,cptRow) {
+	var tableau = [];
+	var tValue = [];
+	tValue.push(strValue);
+	for(var k = 0; k < cptRow; k++){
+		tableau.push(tValue);
+	}
+	console.log("tableauFormule = " + tableau);
+	return tableau;
+}
+ function getUrlJsonSync(url){
+    var jqxhr = $.ajax({
+        type: "GET",
+        url: url,
+        dataType: 'json',
+        cache: false,
+        async: false
+    });
+
+    // 'async' has to be 'false' for this to work
+    var response = jqxhr.responseJSON;
+    return response;
+} 
+
+function loadValue(){
+	document.getElementById("gif_patenter").style.display = "block";
+	arrSheetTraitement = JSON.parse(localStorage.getItem("arrayListOngletSelected"));
+	loadFile(arrSheetTraitement.shift());
+}
+/** 
+ * @description
+ * @param
+ * @return
+ */
+function fusionRefFile(){
+	var myFile = document.getElementById("file");
+	var reader = new FileReader();
+
+	reader.onload = (event) => {
+		Excel.run((context) => {
+			// strip off the metadata before the base64-encoded string
+			var startIndex = reader.result.toString().indexOf("base64,");
+			var workbookContents = reader.result.toString().substr(startIndex + 7);
+
+			var sheets = context.workbook.worksheets;
+			sheets.addFromBase64(
+				workbookContents,
+				null, // get all the worksheets
+				Excel.WorksheetPositionType.after, // insert them after the worksheet specified by the next parameter
+				sheets.getActiveWorksheet() // insert them after the active worksheet
+			);
+			return context.sync();
+		});
+	};
+
+	// read in the file as a data URL so we can parse the base64-encoded string
+	reader.readAsDataURL(myFile.files[0]);
+}
+/** 
+ * @description
+ * @param
+ * @return
+ */
+function loadFile(sheetName){
+	console.log("Start loadFile");
+	var arrayListOnglet = JSON.parse(localStorage.getItem("arrayListOnglet"));
+	Excel.run(function (context) {
+		var arrayListOnglet = JSON.parse(localStorage.getItem("arrayListOngletSelected"));
+		var sheets = context.workbook.worksheets;
+		var sheet;
+		var table;
+		var tables = context.workbook.tables;
+		var headerTable;
+		var bodyTable;
+		sheets.load("items/name");
+		return context.sync()
+			//***** Vérification de l'existance des onglets
+			.then( function () {
+				for (i = 0 ; i < arrayListOnglet.length ; i++){ 
+					var C1 = true;//document.getElementById("idCheck" + arrayListOnglet[i]).checked
+					var L1 = arrayListOnglet[i];
+					if (C1 ==true){
+						var Find= false;
+						for (var j in sheets.items) {
+							AddSheet=sheets.items[j].name;
+							if (AddSheet === L1 ){Find=true};                     
+							}
+						if (Find==false){ 
+							console.log(L1 + " créé");
+							var varSheet = sheets.add(L1);
+							varSheet.load("name, position");
+						}
+					}
+				}
+				sheets.load("items/name");
+				tables.load("items/name");
+				return context.sync();
+			})
+			//***** Création des tableaux
+			.then(function () {
+				var tablesName =[];
+				for(var i = 0; i < tables.items.length; i++) 
+                { 
+					tablesName.push(tables.items[i].name);
+                }
+				sheets.items.forEach( function (varSheet) {
+					if(varSheet.name==sheetName){
+						sheet=varSheet;
+					}
+				});
+				sheet.activate();
+				if(!(tablesName.indexOf(sheet.name)>-1)){
+					table = sheet.tables.add(sheet.getUsedRange(), true);
+					table.name = sheet.name;
+				}else{
+					table = sheet.tables.getItem(sheet.name);
+				}
+				headerTable = table.getHeaderRowRange().load("values");
+				bodyTable = table.getDataBodyRange().load("values");
+				sheets = context.workbook.worksheets;
+				sheets.load("items/name");
+				table.columns.load("items/name");
+				return context.sync(table);
+			})
+			//***** Création des entête de colonne
+			.then(function (table){
+				var jsonFile =JSON.parse(localStorage.getItem("JsonFile"));
+				localStorage.setItem(sheetName+"_tableHeader",JSON.stringify(headerTable.values));
+				localStorage.setItem(sheetName+"_tableValue",JSON.stringify(bodyTable.values));
+				var headerTabCount = headerTable.values[0].length;
+				var valueTabCount = bodyTable.values.length;
+				console.log("headerTabCount = "+headerTabCount);
+				console.log("valueTabCount = "+valueTabCount);
+				var onglet = jsonFile.Onglets.find(Onglets => {
+					   return Onglets.Titre == sheet.name
+				})
+				
+					var tableau = [];
+					var colLength ;
+					var colHeader;
+					var colAide;
+					var colVal;
+					var colForm;
+					var keys;
+					var jsondat;
+					if(onglet.URLJSONData===undefined){
+						colLength = onglet.Colonnes.length;
+					}else{
+						jsondata = getUrlJsonSync(onglet.URLJSONData);
+						keys = Object.keys(jsondata.Data[0]);
+						colLength =keys.length;
+					}
+					for(var j = 0; j < colLength; j++){
+						if(onglet.URLJSONData===undefined){
+							colHeader = onglet.Colonnes[j].Nom;
+							colAide = "";//onglet.Colonnes[j].Aide;
+							if(!(onglet.Colonnes[j].Value===undefined)){
+								colVal = onglet.Colonnes[j].Value;
+								colAide = colVal;
+							}							
+						}else{
+							colHeader = keys[j];
+							colAide = "";
+							colVal = "";
+						}
+						var col;
+						if(!(headerTable.values[0].indexOf(colHeader)>-1)){
+							col = table.columns.add(null,getExcelColonneStr(colHeader,colAide,colVal,valueTabCount));
+						}else{
+							col = table.columns.getItem(colHeader);
+						}
+						if(!(onglet.Colonnes===undefined) && !(onglet.Colonnes[j].Formule===undefined)){
+							col.getDataBodyRange().formulasLocal = getExcelColonneFormuleStr(onglet.Colonnes[j].Formule,valueTabCount);
+						}
+						tableau = [];
+					}
+					//***** Suppression de la colonne "Colonne1" créé par défaut si l'onglet était vide // ATTENTION: Si Excel est dans une autre langue cela ne fonctionne plus 
+					if(valueTabCount==1 && table.columns.items[0].name=="Colonne1"){
+						var column = table.columns.items[0];
+						column.delete();
+					}
+				return context.sync();
+			})
+			.then(function () {
+				if(arrSheetTraitement.length>0){
+					loadFile(arrSheetTraitement.shift());
+				}else{
+					document.getElementById("gif_patenter").style.display = "none";
+				}
+			})
+			;
+	})//.catch(errorHandlerFunction);
+}
+
+/** 
+ * @description
+ * @param
+ * @return
+ */
 function Start(){
   console.log("Start");
 
@@ -25,8 +323,11 @@ function Start(){
  
 }
 
-/////////////////////////////////////////////////////////
-//Effacement des cellules coloriées
+/** 
+ * @description Effacement des cellules coloriées
+ * @param
+ * @return
+ */
 function Clear(Nbli,Colj){
     console.log("Start Clear");
     var RangeT = RangeTrait(Nbli,Colj);
@@ -46,9 +347,13 @@ function Clear(Nbli,Colj){
      })//.catch(function (error) { 
        // console.log(error); 
      //});
-} 
-/////////////////////////////////////////////
-//Convertion ligne colonne en Adresse Range
+}
+
+/** 
+ * @description Convertion ligne colonne en Adresse Range
+ * @param
+ * @return
+ */
 function RangeTrait(NbLigne,NumCol){
   var TextCol = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","R","S","T","U","V","W","X","Y","Z"];
   var Colonne = TextCol[NumCol];
@@ -56,8 +361,11 @@ function RangeTrait(NbLigne,NumCol){
   return RangeT;
 }
 
-/////////////////////////////////////////////////
-
+/** 
+ * @description Click sur le bouton vérifier
+ * @param
+ * @return
+ */
 function Verif(Nbli,Colj){
   Excel.run(function (context) {
     console.log("Start vérif");
@@ -101,16 +409,23 @@ function Verif(Nbli,Colj){
    //});
   } 
 
- /////////////////////////
- 
+/** 
+ * @description 
+ * @param
+ * @return
+ */ 
  function ErrorV(i) {console.log("Erreur ligne :" + ( i+ 1));
                                 //  NbError ++;                           
                                 //  range.format.fill.color = 'red';
  }              
 
-////////////////////
-
+/** 
+ * @description 
+ * @param
+ * @return
+ */
 function Ecriture_Range() {
+	console.log("Start method : Ecriture_Range");
     Excel.run(function (context) {
         var sheetName = 'Data';
         var rangeAddress = 'A1:A2000';
@@ -133,7 +448,11 @@ function Ecriture_Range() {
     });
 } 
 
-////////////////////////////////////////////////
+/** 
+ * @description 
+ * @param
+ * @return
+ */
 function Affiche_le_Range_Sélectionné() {
     Excel.run(function (context) {
         var selectedRange = context.workbook.getSelectedRange();
@@ -158,54 +477,35 @@ function MsgBox() {
     // app.showNotification ("titre", "Hello");
     }    
 
-///////////////////////////////
-function LoadJs(){
-    console.log("Load");
-    IdL=document.getElementById("ListeContrat").options.selectedIndex
-    var Lc= localStorage.getItem("Liste_Contrat");
-    var Lc =JSON.parse(Lc);
-    var JsonFile=Lc.objects[IdL].json
-
-  $.get(JsonFile, function(data){
-    localStorage.setItem("JsonFile",JSON.stringify(data));
-  });
-    $.get(JsonFile, function(data){
-        for (i=0; i<4;i++){
-        var c1=data.Onglets[i].Titre
-        var L1 = document.getElementById("Lbl" + i);
-        L1.textContent=c1;
-        }
-    
-    });    
-}
-/////////////////////////////
 
 function NewSheet(){
-Excel.run(function (context) {
-    var sheets = context.workbook.worksheets;
-    sheets.load("items/name");
-    return context.sync()
-        .then(function () {
-            for (i = 0 ; i < 4 ; i++){ 
-                var C1 = document.getElementById("idCheck" + i).checked
-                var L1 = document.getElementById("Lbl" + i);
-                var L1 = L1.textContent;
-                if (C1 ==true){
-                    var Find= false;
-                    for (var j in sheets.items) {
-                        AddSheet=sheets.items[j].name;
-                        if (AddSheet === L1 ){Find=true};                     
-                        }
-                    if (Find==false){ 
-                        console.log(L1 + " créé");
-                        var sheet = sheets.add(L1);
-                        sheet.load("name, position");
-                    }
-                }
-            }
-        //    console.log(`Added worksheet named "${sheet.name}" in position ${sheet.position}`);
-        });
-})//.catch(errorHandlerFunction);
+	Excel.run(function (context) {
+		var arrayListOnglet = JSON.parse(localStorage.getItem("arrayListOngletSelected"));
+		var sheets = context.workbook.worksheets;
+		sheets.load("items/name");
+		return context.sync()
+			.then( function () {
+				for (i = 0 ; i < arrayListOnglet.length ; i++){ 
+					var C1 = document.getElementById("idCheck" + arrayListOnglet[i]).checked
+					//var L1 = document.getElementById("Lbl" + arrayListOnglet[i]);
+					//var L1 = L1.textContent;
+					var L1 = arrayListOnglet[i];
+					if (C1 ==true){
+						var Find= false;
+						for (var j in sheets.items) {
+							AddSheet=sheets.items[j].name;
+							if (AddSheet === L1 ){Find=true};                     
+							}
+						if (Find==false){ 
+							console.log(L1 + " créé");
+							var sheet = sheets.add(L1);
+							sheet.load("name, position");
+						}
+					}
+				}
+			//    console.log(`Added worksheet named "${sheet.name}" in position ${sheet.position}`);
+			});
+	})//.catch(errorHandlerFunction);
 }
 
 ///////////////////////////////////////////////
@@ -282,29 +582,7 @@ function run1() {
     });
   }
 
-////////////////////////////////////
 
-function Start1(){
-      console.log("Start FHA ...")
-      $.get("./json/00_list_type_import.json", function(data){
-        localStorage.setItem("Liste_Contrat",JSON.stringify(data));
-      });
-      var Liste_Contrat= localStorage.getItem("Liste_Contrat");
-      var Liste_Contrat =JSON.parse(Liste_Contrat);
-      var ListeC = document.getElementById('ListeContrat');
-
-      for (var i = 0 ; i < Liste_Contrat.objects.length ; i++) {
-        var Contrat = Liste_Contrat.objects[i].name;
-        var opt = document.createElement('option');
-        opt.appendChild(document.createTextNode(Contrat) );
-        opt.value = 'option value'; 
-        ListeC.appendChild(opt); 
-      }
-      LoadJs();
-      $.get("./json/Contrat_FM.json", function(data){
-        localStorage.setItem("JsonFile",JSON.stringify(data));
-      });
-}
 
 ///////////////////////////////////////////////////////  
 //Effacement Commentaire
@@ -360,7 +638,8 @@ function GetJson(Colj){
 }
 
 ///////////////////////////////////////
-validate.extend(validate.validators.datetime, {
+// Désactivé avec le validatejs (Pour test)
+/* validate.extend(validate.validators.datetime, {
   // The value is guaranteed not to be null or undefined but otherwise it
   // could be anything.
   parse: function(value, options) {
@@ -371,7 +650,7 @@ validate.extend(validate.validators.datetime, {
     var format = options.dateOnly ? "DD/MM/YYYY" : "DD/MM/YYYY hh:mm:ss";
     return moment.utc(value).format(format);
   }
-});
+});*/
 
 /////////////////////////////
 function VerifOng(){
@@ -410,43 +689,47 @@ function CompareCol(){
   setTimeout(function(){ 
   
   //Nbli=localStorage.getItem("Nbli");
-  var Nbli = 50 //Nblx();
+  var Nbli = 55; //Nblx();
   var C = 0;
-  SelectSheet("C1")
+// SelectSheet("C1");
   Excel.run(function (context) {
 
     var RangeT = ("A1:A" + Nbli);
+    var sheet = context.workbook.worksheets.getItem("C1");
+    sheet.activate();
+    sheet.load("name");
+
     var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
    
     var RangeC = localStorage.getItem("RangeC");
     RangeC=(RangeC.split(","));
-    console.log("Valeure cell : " + RangeC.indexOf("FFF"));
 
   return context.sync()
       .then(function () {
-
         for (var i = 0 ; i<=Nbli ; i++ ) {
           var Cellv=_range.values[i][C];
-          console.log("Ligne : " + i + " Cellv : " + Cellv + " Trouvé : " +  RangeC.indexOf(Cellv));
-        //  RechV(Cellv,i);
+          if (RangeC.indexOf(Cellv) == "-1"){
+            console.log("Ligne : " + (i+1) + " Cellv : " + Cellv + " Trouvé : " +  (RangeC.indexOf(Cellv) +1));
+            var range = context.workbook.worksheets.getActiveWorksheet().getCell((i+1),(C+1));
+            range.format.fill.color = 'red';
+          }
         }
-
       });
   })
-}, 1000);
+  }, 1000);
 }
 
 ////////////////////////////////////////
 function ListeRech(){
-  var Nbli = 1000 //Nblx();
+  var Nbli = 59 //Nblx();
   var C = 0;
   Sheetname="C2";
   SelectSheet(Sheetname);
   setTimeout(function(){ 
   Excel.run(function (context) {
-     var RangeT = ("A1:A" + Nbli);
+     var RangeT2 = ("A1:A" + Nbli);
      var worksheet = context.workbook.worksheets.getItem(Sheetname);
-     var range2 = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
+     var range2 = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT2).load("values,address");
   return context.sync()
       .then(function () {
           var RangeC= range2.values;

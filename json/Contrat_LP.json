@@ -1,0 +1,157 @@
+{
+	"Name": "Contrat Simple",
+	"Description": "Ce fichier est la description d'import pour un contrat FM",
+	"Version": "0.0.1",
+	"ApiUrl":"http://XXXXX.com",
+	"Onglets": [
+		{
+			"Titre": "Contrat",
+			"ApiDBName":"",
+			"Colonnes": [
+				{
+					"Nom": "ID",
+					"ApiName":""
+				}
+			]
+		},
+		{
+			"Titre": "_variables",
+			"Colonnes": [
+				{
+					"Nom": "Btm",
+					"ApiName":"",
+					"Aide": "Texte d'aide",
+					"Value": "_BTM_"
+				},
+				{
+					"Nom": "formID",
+					"ApiName":"",
+					"Aide": "Texte d'aide",
+					"Value": "0000"
+				}
+			]
+		},
+		{
+			"Titre": "Batiment",
+			"Colonnes": [
+				{
+					"Nom": "ID",
+					"ApiName":"",
+					"Aide": "Texte d'aide",
+					"Formule": "=Contrat[ID]& \"_TOTO_\"&TEXTE(LIGNE();_variables[formID])",
+					"Validation":[["bUnique"],["bNotNull"]]
+				},
+				{
+					"Nom": "CODE",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "NOM",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "NOM SITE",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "REGION EXPRIMM",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "AGENCE EXPRIMM",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "SECTEUR EXPRIMM",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "ADRESSE",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "CODE POSTAL",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "PAYS",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "TELEPHONE STANDARD",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "HORAIRES OUVERTURE",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				},
+				{
+					"Nom": "DATE CREATION",
+					"ApiName":"",
+					"Aide": "Texte d'aide",
+					"Validation":[["dateInPast"]]
+				},
+				{
+					"Nom": "Liste erreur",
+					"Aide": "Texte d'aide",
+					"Formule":"allFormuleValidation"
+				}
+			]
+		},
+		{
+			"Titre": "Etage",
+			"Colonnes": [
+				{
+					"Nom": "Colonne 1",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				}
+			]
+		},
+		{
+			"Titre": "Espace",
+			"Colonnes": [
+				{
+					"Nom": "Colonne 1",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				}
+			]
+		},
+		{
+			"Titre": "Equipement",
+			"Colonnes": [
+				{
+					"Nom": "Colonne 1",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				}
+			]
+		},
+		{
+			"Titre": "Personne",
+			"Colonnes": [
+				{
+					"Nom": "Colonne 1",
+					"ApiName":"",
+					"Aide": "Texte d'aide"
+				}
+			]
+		},
+		{
+			"Titre": "ObjRef",
+			"URLJSONData": "./json/data/DataSample.json"
+		}
+	]
+}

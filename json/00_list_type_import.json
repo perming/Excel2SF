@@ -1,5 +1,9 @@
 {
   "objects": [{
+      "name": "Contrat Test LP",
+      "description": "Contrat de type FM",
+      "json": "./json/contrat_LP.json"
+    },{
       "name": "Contrat de type FM",
       "description": "Contrat de type FM",
       "json": "./json/contrat_FM.json"
