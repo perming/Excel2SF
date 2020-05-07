@@ -772,3 +772,25 @@ function Comp_WorkB(){
         });
   })
 }
+///////////////////////////////////////////////
+function Add_Id(){
+  console.log("Start vérif Id");
+  Nbli=localStorage.getItem("Nbli");
+  Colj=localStorage.getItem("Colj");
+
+  Nbli="10";
+  var RangeT = ("A1:B" + Nbli);
+
+  console.log(" Test Nbl : " + Nbli);
+  Excel.run(function (context) {
+	  var _range = context.workbook.worksheets.getActiveWorksheet().getRange(RangeT).load("values,address");
+	  
+	  return context.sync().then(function () { 
+		for (var i = 1 ; i<=Nbli ; i++ ) {
+			var Cellv=_range.values[i][0];
+		   // _range[i][1].values="ID_1";
+			console.log(Cellv);
+		};
+	  });
+  });
+}
