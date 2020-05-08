@@ -1,4 +1,4 @@
 # another path:
 /*
   # headers for that path:
-  X-Frame-Options: https://euc-excel.officeapps.live.com
+  X-Frame-Options: allowall 
