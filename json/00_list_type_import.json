@@ -2,21 +2,21 @@
   "objects": [{
       "name": "Contrat Test LP",
       "description": "Contrat de type FM",
-      "json": "./json/contrat_LP.json"
+      "json": "./json/Contrat_LP.json"
     },{
       "name": "Contrat de type FM",
       "description": "Contrat de type FM",
-      "json": "./json/contrat_FM.json"
+      "json": "./json/Contrat_FM.json"
     },
     {
       "name": "Contrat de type PPP",
       "description": "Contrat de type PPP",
-      "json": "./json/contrat_PPP.json"
+      "json": "./json/Contrat_PPP.json"
     },
     {
       "name": "Contrat de type ITI",
       "description": "Contrat de type ITI",
-      "json": "./json/contrat_ITI.json"
+      "json": "./json/Contrat_ITI.json"
     }
   ]
 }
